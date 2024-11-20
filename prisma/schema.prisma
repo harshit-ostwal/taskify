@@ -3,19 +3,19 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
 }
 
 model User {
-  id              String    @id @unique @default(uuid())
-  avatar          String
-  name            String
-  email           String
-  type            Type
-  tasks           Task[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id        String   @id @unique @default(uuid())
+  avatar    String
+  name      String
+  email     String
+  type      Type
+  tasks     Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([email, type])
 }
