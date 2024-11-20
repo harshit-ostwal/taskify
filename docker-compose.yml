@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    hostname: HarshitJain
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=Taskify
+      - POSTGRES_USER=HarshitJain
+      - POSTGRES_PASSWORD=CodeWithHarshit
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
