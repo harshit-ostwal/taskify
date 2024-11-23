@@ -1,5 +1,6 @@
-import React from 'react';
-import { Eraser, Globe, SunMoonIcon, UserX2 } from 'lucide-react';
+"use client"
+import React, { useState } from 'react';
+import { Eraser, Globe, Loader, SunMoonIcon, UserX2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -23,8 +24,49 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useSessionAuth } from '@/hooks/useUserAuth';
 
 function page() {
+
+  const [isLoading, setIsLoading] = useState(false);
+  const { handleSignOut } = useSessionAuth();
+
+  const handleDeleteTasks = async () => {
+    try {
+      setIsLoading(true);
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_URL}/api/profile/tasksDelete`);
+
+      if (res) {
+        toast.success("Tasks Deleted Successfully!");
+      }
+
+    } catch (error) {
+      toast.error(error?.response?.data?.Response || "Error Occurred While Deleting Tasks.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsLoading(true);
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_URL}/api/profile`);
+
+      if (res) {
+        toast.success("Account And Associated Data Deleted Successfully.");
+        setTimeout(() => {
+          handleSignOut();
+        }, 1000);
+      }
+
+    } catch {
+      toast.error(error?.response?.data?.Response || "Error Occurred While Deleting The Account.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center w-full py-20">
@@ -86,7 +128,9 @@ function page() {
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Tasks</Button>
+                <Button variant="destructive" disabled={isLoading} className="min-w-20">
+                  {isLoading ? <Loader className="animate-spin" /> : "Delete Tasks"}
+                </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -97,7 +141,7 @@ function page() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction>Delete Tasks</AlertDialogAction>
+                  <AlertDialogAction onClick={handleDeleteTasks}>Delete Tasks</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -116,7 +160,9 @@ function page() {
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete My Account</Button>
+                <Button variant="destructive" disabled={isLoading} className="min-w-40">
+                  {isLoading ? <Loader className="animate-spin" /> : "Delete My Account"}
+                </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -127,52 +173,12 @@ function page() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction>Delete Account</AlertDialogAction>
+                  <AlertDialogAction onClick={handleDeleteAccount}>Delete Account</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
         </div>
-
-        {/* Recent Notifications */}
-        {/* <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold">Recent Notifications</h2>
-          <div className="flex flex-col gap-4">
-            {[
-              {
-                title: 'New login detected',
-                description: 'A new login was detected from Chrome on Windows',
-                time: '2 hours ago',
-                type: 'security'
-              },
-              {
-                title: 'Profile updated',
-                description: 'Your profile information was successfully updated',
-                time: '1 day ago',
-                type: 'account'
-              },
-              {
-                title: 'Password changed',
-                description: 'Your account password was changed successfully',
-                time: '3 days ago',
-                type: 'security'
-              }
-            ].map((notification, index) => (
-              <div key={index} className="flex items-start gap-4 p-4 rounded-lg bg-gray-50">
-                <div className={`p-2 rounded-lg ${notification.type === 'security' ? 'bg-red-100' : 'bg-blue-100'
-                  }`}>
-                  <Bell className={`w-5 h-5 ${notification.type === 'security' ? 'text-red-600' : 'text-blue-600'
-                    }`} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">{notification.title}</h3>
-                  <p className="text-sm text-gray-500">{notification.description}</p>
-                  <span className="text-xs text-gray-400">{notification.time}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>*/}
       </div >
     </div >
   )

@@ -2,7 +2,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 
-export function useUser() {
+export function useSessionAuth() {
   const { data: session, status } = useSession();
   const [loader, setLoader] = useState(false);
 

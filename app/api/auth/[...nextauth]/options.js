@@ -38,7 +38,6 @@ export const authOptions = {
                         }
                     },
                     update: {
-                        name: user.name,
                         avatar: user.image,
                     },
                     create: {
@@ -50,6 +49,7 @@ export const authOptions = {
                 })
 
                 token.userId = createUser.id;
+                token.type = createUser.type;
             }
 
             return token;
@@ -72,6 +72,7 @@ export const authOptions = {
                         name: user.name,
                         email: user.email,
                         image: user.avatar,
+                        type: user.type,
                         tasks: user.tasks || []
                     };
                 }

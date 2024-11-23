@@ -14,11 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
 import { Button } from './ui/button'
-import { useUser } from '@/hooks/useUserSession'
+import { useSessionAuth } from '@/hooks/useUserAuth'
+import { Skeleton } from './ui/skeleton'
+import { useUser } from '@/hooks/useUser'
 
 function Navbar() {
 
-    const { handleSignOut, session } = useUser();
+    const { handleSignOut } = useSessionAuth();
+    const { user, loading } = useUser();
 
     return (
         <div className="flex items-center justify-around w-full p-5">
@@ -32,10 +35,10 @@ function Navbar() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="items-center justify-start w-56 p-2">
                             <Avatar>
-                                <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
-                                <AvatarFallback>{session?.user?.name ? session.user.name[0] + session.user.name[1] : 'HJ'}</AvatarFallback>
+                                <AvatarImage src={user.avatar} alt={user.name} />
+                                <AvatarFallback><Skeleton className="w-10 h-10 rounded-full" /></AvatarFallback>
                             </Avatar>
-                            <h1 className="text-left truncate max-w-40 text-ellipsis">{session?.user?.name}</h1>
+                            <h1 className="w-full text-left truncate max-w-40 text-ellipsis">{loading ? <Skeleton className="w-full h-8 max-w-40" /> : user.name}</h1>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">

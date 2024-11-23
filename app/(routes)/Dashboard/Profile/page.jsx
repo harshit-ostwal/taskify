@@ -1,7 +1,6 @@
 "use client"
-import React, { useState } from 'react';
-import { Camera } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import React, { useEffect, useState } from 'react';
+import { Loader } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Form,
@@ -16,22 +15,48 @@ import { useForm } from "react-hook-form"
 import { userSchema } from '@/schema/user-schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useUser } from '@/hooks/useUserSession';
+import { useUser } from '@/hooks/useUser';
+import { Skeleton } from '@/components/ui/skeleton';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 function page() {
 
-  const { session } = useUser();
+  const { user, loading, refetch } = useUser();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      name: session?.user?.name || "",
-      email: session?.user?.email || "",
+      name: "",
+      email: "",
     },
-  })
+  });
 
-  const onSubmit = (values) => {
-    console.log(values);
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, form]);
+
+  const onSubmit = async (data) => {
+    try {
+      setIsLoading(true);
+      const res = await axios.patch(`${process.env.NEXT_PUBLIC_URL}/api/profile`, data);
+
+      if (res) {
+        toast.success("Profile Updated Successfully!")
+        refetch();
+      }
+
+    } catch {
+      toast.error(error?.response?.data?.Response || "Error While Updating Profile!");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -42,15 +67,22 @@ function page() {
           <h1 className="mb-4 text-2xl font-bold">Profile Information</h1>
 
           <div className="flex items-center justify-between gap-4 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center w-full gap-4">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
-                <AvatarFallback>{session?.user?.name ? session.user.name[0] + session.user.name[1] : 'HJ'}</AvatarFallback>
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback><Skeleton className="w-24 h-24 rounded-full" /></AvatarFallback>
               </Avatar>
-              <div>
-                <h1 className="font-medium">{session?.user?.name}</h1>
-                <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
-              </div>
+              {loading ? (
+                <div className="flex flex-col w-full gap-2">
+                  <Skeleton className="h-8 w-96" />
+                  <Skeleton className="h-8 w-96" />
+                </div>
+              ) : (
+                <div className="flex flex-col">
+                  <h1 className="font-medium">{user.name}</h1>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -64,26 +96,27 @@ function page() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Harshit Jain" {...field} />
+                    <Input type={"text"} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
-              control={form.control}
               name="email"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="harshitostwal1234@gmail.com" {...field} />
+                    <Input type={"email"} disabled placeholder={user.email} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Update</Button>
+            <Button type="submit" disabled={isLoading || loading}>
+              {isLoading || loading ? <Loader className="animate-spin" /> : "Update"}
+            </Button>
           </form>
         </Form>
 

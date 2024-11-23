@@ -4,11 +4,11 @@ import { FcGoogle } from "react-icons/fc";
 import React from 'react'
 import { Button } from '@/components/ui/button';
 import ThemeToggleBtn from '@/components/common/theme-toggle-btn';
-import { useUser } from '@/hooks/useUserSession';
+import { useSessionAuth } from '@/hooks/useUserAuth';
 
 function page() {
 
-  const { handleSignIn, status, loader } = useUser();
+  const { handleSignIn, status, loader } = useSessionAuth();
 
   if (status === "loading") {
     return (
